@@ -2,7 +2,6 @@ package model
 
 import (
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"net/http"
 	"testing"
@@ -65,7 +64,6 @@ func (r Responses) AssertHeader(t *testing.T, skipKeys []string) {
 }
 
 func (r *Responses) BodyPair(skipBodyPaths []string) (*StringPair, error) {
-	fmt.Println(r.Res1.Header["Content-Type"])
 	switch r.Res1.Header["Content-Type"][0] {
 	case "application/json":
 		// レスポンスよりMap型でJSONを取得
