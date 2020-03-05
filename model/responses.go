@@ -1,8 +1,6 @@
 package model
 
 import (
-	"bytes"
-	"encoding/json"
 	"io/ioutil"
 	"net/http"
 	"reflect"
@@ -62,30 +60,19 @@ HEADERS:
 func (r *Responses) AssertBody(t *testing.T, skipBodyPaths []string) {
 	switch r.Res1.Header["Content-Type"][0] {
 	case "application/json":
-		b1, err := ioutil.ReadAll(r.Res1.Body)
-		// 読みきったBody部分を復元
-		r.Res1.Body = ioutil.NopCloser(bytes.NewReader(b1))
-		assert.NoError(t, err, "fails in reading json response body 1")
-		bMap1 := make(map[string]interface{})
-		if err := json.Unmarshal(b1, &bMap1); err != nil {
-			t.Error(err, "fails in unmarshal body 1")
-		}
+		// レスポンスを読み取り生JSONと Map形式JSONを取得
+		bJSON1, bMap1, err := util.CreateBytesAndMapFromJSONBody(r.Res1)
+		assert.NoError(t, err)
+		bJSON2, bMap2, err := util.CreateBytesAndMapFromJSONBody(r.Res2)
+		assert.NoError(t, err)
 
-		b2, err := ioutil.ReadAll(r.Res2.Body)
-		// 読みきったBody部分を復元
-		r.Res2.Body = ioutil.NopCloser(bytes.NewReader(b1))
-		assert.NoError(t, err, "fails in reading json response body 2")
-		bMap2 := make(map[string]interface{})
-		if err := json.Unmarshal(b2, &bMap2); err != nil {
-			t.Error(err, "fails in unmarshal body 2")
-		}
 		// スキップ属性を除去
 		util.RemoveElmFromMap(&bMap1, skipBodyPaths)
 		util.RemoveElmFromMap(&bMap2, skipBodyPaths)
 
 		// 階層的に確認
 		eq := reflect.DeepEqual(bMap1, bMap2)
-		assert.True(t, eq, "### Body1:\n"+string(b1)+"\n### Body2:\n"+string(b2)+"")
+		assert.True(t, eq, "### Body1:\n"+string(bJSON1)+"\n### Body2:\n"+string(bJSON2)+"")
 	default:
 		b1, err := ioutil.ReadAll(r.Res1.Body)
 		assert.NoError(t, err, "fails in reading response body 1")
