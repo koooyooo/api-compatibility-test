@@ -8,24 +8,27 @@ import (
 )
 
 func CallAPIs(r1, r2 *model.Request) (*model.Responses, error) {
-	res1, err := callAPI(r1.Method, r1.Url, r1.Header, r1.Body)
+	call := func(r *model.Request) (*http.Response, error) {
+		req, err := http.NewRequest(r.Method, r.Url, bytes.NewBuffer(r.Body))
+		if err != nil {
+			return nil, err
+		}
+		if r.Header != nil {
+			req.Header = *r.Header
+		}
+		return callRawAPI(req)
+	}
+	res1, err := call(r1)
 	if err != nil {
 		return nil, err
 	}
-	res2, err := callAPI(r1.Method, r1.Url, r1.Header, r1.Body)
+	res2, err := call(r2)
 	if err != nil {
 		return nil, err
 	}
 	return &model.Responses{res1, res2}, nil
 }
 
-func callAPI(method, url string, header *http.Header, body []byte) (*http.Response, error) {
-	req, err := http.NewRequest(method, url, bytes.NewBuffer(body))
-	req.Header = *header
-	if err != nil {
-		return nil, err
-	}
-	cli := &http.Client{}
-	resp, err := cli.Do(req)
-	return resp, err
+func callRawAPI(req *http.Request) (*http.Response, error) {
+	return http.DefaultClient.Do(req)
 }
