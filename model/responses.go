@@ -63,17 +63,17 @@ func (r Responses) AssertBody(t *testing.T, skipBodyPaths []string) {
 	case "application/json":
 		//
 		b1, err := ioutil.ReadAll(r.Res1.Body)
-		assert.Nil(t, err)
+		assert.NoError(t, err, "fails in reading json response body 1")
 		bMap1 := make(map[string]interface{})
 		if err := json.Unmarshal(b1, &bMap1); err != nil {
-			t.Error(err)
+			t.Error(err, "fails in unmarshal body 1")
 		}
 
 		b2, err := ioutil.ReadAll(r.Res2.Body)
-		assert.Nil(t, err)
+		assert.NoError(t, err, "fails in reading json response body 2")
 		bMap2 := make(map[string]interface{})
 		if err := json.Unmarshal(b2, &bMap2); err != nil {
-			t.Error(err)
+			t.Error(err, "fails in unmarshal body 2")
 		}
 		// スキップ属性を除去
 		util.RemoveElmFromMap(&bMap1, skipBodyPaths)
@@ -84,9 +84,9 @@ func (r Responses) AssertBody(t *testing.T, skipBodyPaths []string) {
 		assert.True(t, eq, "### Body1:\n"+string(b1)+"\n### Body2:\n"+string(b2)+"")
 	default:
 		b1, err := ioutil.ReadAll(r.Res1.Body)
-		assert.Nil(t, err)
+		assert.NoError(t, err, "fails in reading response body 1")
 		b2, err := ioutil.ReadAll(r.Res2.Body)
-		assert.Nil(t, err)
+		assert.NoError(t, err, "fails in reading response body 2")
 		assert.Equal(t, string(b1), string(b2))
 	}
 }
