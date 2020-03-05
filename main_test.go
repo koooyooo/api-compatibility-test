@@ -22,6 +22,6 @@ func TestHttpBin(t *testing.T) {
 
 	// 結果確認
 	resps.AssertStatus(t)
-	resps.AssertHeader(t, []string{"Date", "Content-Length"})
-	resps.AssertBody(t, []string{"headers/X-Amzn-Trace-Id", "headers/Hello"})
+	resps.AssertHeader(t, []string{"Dates", "Content-Length"})
+	resps.AssertBody(t, []string{"headers/X-Amzn-Trace-Id", "headers/Hello", "origin"})
 }

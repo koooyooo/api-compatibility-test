@@ -53,7 +53,7 @@ HEADERS:
 				continue
 			}
 			// Value値を比較
-			assert.Equal(t, v1, v2, "HeaderKey:["+hk1+"], Val1:["+v1+"], Val2:["+v2+"]")
+			assert.Equal(t, v1, v2, "Key:["+hk1+"]\n  Val1:["+v1+"]\n  Val2:["+v2+"]")
 		}
 	}
 }
@@ -81,7 +81,7 @@ func (r Responses) AssertBody(t *testing.T, skipPaths []string) error {
 		util.RemoveElmFromMap(&bMap2, skipPaths)
 
 		eq := reflect.DeepEqual(bMap1, bMap2)
-		assert.True(t, eq, "Body1:["+string(b1)+"]\n Not Equal \n["+string(b2)+"]")
+		assert.True(t, eq, "### Body1:\n"+string(b1)+"\n### Body2:\n"+string(b2)+"")
 
 	default:
 		b1, err := ioutil.ReadAll(r.Res1.Body)
