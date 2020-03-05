@@ -2,6 +2,7 @@ package model
 
 import (
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 	"testing"
@@ -26,12 +27,6 @@ type StringPair struct {
 	Second string
 }
 
-//func (r Responses) AssertAll(t *testing.T, skipHeaders, skipBodyPaths []string) {
-//	r.AssertStatus(t)
-//	r.AssertHeader(t, skipHeaders)
-//	r.AssertBody(t, skipBodyPaths)
-//}
-
 func (r Responses) StatusPair() *IntPair {
 	return &IntPair{r.Res1.StatusCode, r.Res2.StatusCode}
 }
@@ -40,6 +35,7 @@ func (r Responses) AssertStatus(t *testing.T) {
 	p := r.StatusPair()
 	assert.Equal(t, p.First, p.Second)
 }
+
 func (r Responses) HeaderPair(skipKeys []string) (*StringPair, error) {
 	stringfy := func(h http.Header, skipKeys []string) (string, error) {
 		for _, key := range skipKeys {
@@ -66,37 +62,10 @@ func (r Responses) AssertHeader(t *testing.T, skipKeys []string) {
 	p, err := r.HeaderPair(skipKeys)
 	assert.NoError(t, err)
 	assert.Equal(t, p.First, p.Second)
-
-	//	h1 := r.Res1.Header.Clone()
-	//	h2 := r.Res2.Header.Clone()
-	//	// ヘッダ数を比較
-	//	assert.Equal(t, len(h1), len(h2))
-	//
-	//	for _, key := range skipKeys {
-	//		h1.Del(key)
-	//	}
-	//	b, _ := json.Marshal(h1)
-	//	fmt.Println(string(b))
-	//HEADERS:
-	//	for hk1, _ := range h1 {
-	//		hv1 := h1[hk1]
-	//		hv2 := h2[hk1]
-	//		// ヘッダ毎のValue数を比較
-	//		assert.Equal(t, len(hv1), len(hv2))
-	//		for _, sk := range skipKeys {
-	//			if hk1 == sk {
-	//				continue HEADERS
-	//			}
-	//		}
-	//		for i, _ := range hv1 {
-	//			v1 := hv1[i]
-	//			v2 := hv2[i]
-	//			assert.Equal(t, v1, v2, "Key:["+hk1+"]\n  Val1:["+v1+"]\n  Val2:["+v2+"]")
-	//		}
-	//	}
 }
 
 func (r *Responses) BodyPair(skipBodyPaths []string) (*StringPair, error) {
+	fmt.Println(r.Res1.Header["Content-Type"])
 	switch r.Res1.Header["Content-Type"][0] {
 	case "application/json":
 		// レスポンスよりMap型でJSONを取得
@@ -112,6 +81,7 @@ func (r *Responses) BodyPair(skipBodyPaths []string) (*StringPair, error) {
 		// スキップ属性を除去し[]byte型に復元
 		util.RemoveElmFromMap(&bMap1, skipBodyPaths)
 		util.RemoveElmFromMap(&bMap2, skipBodyPaths)
+
 		removedB1, err := json.Marshal(bMap1)
 		removedB2, err := json.Marshal(bMap2)
 
