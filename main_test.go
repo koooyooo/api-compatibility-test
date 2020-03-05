@@ -29,9 +29,13 @@ func TestHttpBin(t *testing.T) {
 
 // 同じ実装の場合テストが成功する
 func TestBasic(t *testing.T) {
+	// 同じ結果を返すテストサーバを作成
 	var sampleHandler http.HandlerFunc = func(w http.ResponseWriter, r *http.Request) {
-		w.WriteHeader(200)
-		w.Write([]byte(`{"headers": {"hello": "world"}, "body": {"foo": "bar"}}`))
+		switch r.URL.Path {
+		default:
+			w.WriteHeader(200)
+			w.Write([]byte(`{"headers": {"hello": "world"}, "body": {"foo": "bar"}}`))
+		}
 	}
 	server := httptest.NewServer(sampleHandler)
 	defer server.Close()
@@ -44,7 +48,14 @@ func TestBasic(t *testing.T) {
 	assert.NoError(t, err, "fails in client call")
 
 	// 結果確認
-	resps.AssertStatus(t)
-	resps.AssertHeader(t, nil)
-	resps.AssertBody(t, nil)
+	statusPair := resps.StatusPair()
+	assert.Equal(t, statusPair.First, statusPair.Second)
+
+	headerPair, err := resps.HeaderPair(nil)
+	assert.NoError(t, err)
+	assert.Equal(t, headerPair.First, headerPair.Second)
+
+	bodyPair, err := resps.BodyPair(nil)
+	assert.NoError(t, err)
+	assert.Equal(t, bodyPair.First, bodyPair.Second)
 }
