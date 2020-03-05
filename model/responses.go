@@ -17,10 +17,10 @@ type Responses struct {
 	Res2 *http.Response
 }
 
-func (r Responses) AssertAll(t *testing.T, skipHeaders, skipBodyPath []string) {
+func (r Responses) AssertAll(t *testing.T, skipHeaders, skipBodyPaths []string) {
 	r.AssertStatus(t)
 	r.AssertHeader(t, skipHeaders)
-	r.AssertBody(t, skipBodyPath)
+	r.AssertBody(t, skipBodyPaths)
 }
 
 func (r Responses) AssertStatus(t *testing.T) {
@@ -58,41 +58,35 @@ HEADERS:
 	}
 }
 
-func (r Responses) AssertBody(t *testing.T, skipPaths []string) error {
+func (r Responses) AssertBody(t *testing.T, skipBodyPaths []string) {
 	switch r.Res1.Header["Content-Type"][0] {
 	case "application/json":
+		//
 		b1, err := ioutil.ReadAll(r.Res1.Body)
-		if err != nil {
-			return err
-		}
+		assert.Nil(t, err)
 		bMap1 := make(map[string]interface{})
 		if err := json.Unmarshal(b1, &bMap1); err != nil {
-			return err
+			t.Error(err)
 		}
 
 		b2, err := ioutil.ReadAll(r.Res2.Body)
 		assert.Nil(t, err)
 		bMap2 := make(map[string]interface{})
 		if err := json.Unmarshal(b2, &bMap2); err != nil {
-			return err
+			t.Error(err)
 		}
+		// スキップ属性を除去
+		util.RemoveElmFromMap(&bMap1, skipBodyPaths)
+		util.RemoveElmFromMap(&bMap2, skipBodyPaths)
 
-		util.RemoveElmFromMap(&bMap1, skipPaths)
-		util.RemoveElmFromMap(&bMap2, skipPaths)
-
+		// 階層的に確認
 		eq := reflect.DeepEqual(bMap1, bMap2)
 		assert.True(t, eq, "### Body1:\n"+string(b1)+"\n### Body2:\n"+string(b2)+"")
-
 	default:
 		b1, err := ioutil.ReadAll(r.Res1.Body)
-		if err != nil {
-			return err
-		}
+		assert.Nil(t, err)
 		b2, err := ioutil.ReadAll(r.Res2.Body)
-		if err != nil {
-			return err
-		}
+		assert.Nil(t, err)
 		assert.Equal(t, string(b1), string(b2))
 	}
-	return nil
 }
