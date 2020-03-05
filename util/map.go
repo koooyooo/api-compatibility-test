@@ -1,7 +1,6 @@
 package util
 
 import (
-	"fmt"
 	"strings"
 )
 
@@ -13,7 +12,6 @@ func RemoveElmFromMap(m *map[string]interface{}, paths []string) {
 		pathElms := strings.Split(path, "/")
 		for i, elm := range pathElms {
 			if i == len(pathElms)-1 {
-				fmt.Println(elm) // TODO
 				delete(currentMap, elm)
 				break
 			}

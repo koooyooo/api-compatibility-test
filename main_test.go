@@ -2,7 +2,6 @@ package main
 
 import (
 	"bytes"
-	"fmt"
 	"net/http"
 	"testing"
 
@@ -28,7 +27,5 @@ func CallAPI(method, url string, header *http.Header, body string) (*http.Respon
 	}
 	cli := &http.Client{}
 	resp, err := cli.Do(req)
-	fmt.Println(req.Header)
-	fmt.Println(resp) // TODO
 	return resp, err
 }
